@@ -1,0 +1,7 @@
+glm.binomial.disp       Overdispersed binomial logit models.
+glm.poisson.disp        Overdispersed Poisson log-linear models.
+holford                 Holford's data on prostatic cancer deaths
+lm.disp                 Normal dispersion models.
+minitab                 Minitab tree data
+orobanche               Germination of Orobanche
+salmonellaTA98          Salmonella reverse mutagenicity assay
