@@ -186,8 +186,8 @@ function(object, maxit = 30, verbose = TRUE)
     # environment, usually R_GlobalEnv
     disp.weights <<- w; object <<- object
     object <- eval(expression(update(object, weights=disp.weights)), 
-                   envir = object$data)                
-
+                   envir = object$data)
+    #
     h <- lm.influence(object)$hat
     X2 <- pearson.X2(object)
     # current estimate of dispersion parameter

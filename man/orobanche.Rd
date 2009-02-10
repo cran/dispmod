@@ -1,6 +1,6 @@
 \name{orobanche}
+\docType{data}
 \alias{orobanche}
-\non_function{}
 \title{Germination of Orobanche}
 \usage{data(orobanche)}
 \description{

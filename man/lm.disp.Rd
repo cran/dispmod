@@ -54,7 +54,7 @@ Aitkin, M. (1987), Modelling variance heterogeneity in normal regression models 
 \author{Luca Scrucca, \email{luca@stat.unipg.it}}
 \note{Based on a similar procedure available in Arc (Cook and Weisberg, \url{http://www.stat.umn.edu/arc})}
 \seealso{
-\code{\link{lm}}, \code{\link{glm}}, \code{\link{glm.binomial.disp}}, \code{\link{glm.poisson.disp}}, \code{\link{ncv.test}} (in the \code{car} library).
+\code{\link{lm}}, \code{\link{glm}}, \code{\link{glm.binomial.disp}}, \code{\link{glm.poisson.disp}}, \code{\link[car]{ncv.test}} (in the \code{car} library).
 }
 \examples{
 data(minitab)

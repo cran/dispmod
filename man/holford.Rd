@@ -1,6 +1,6 @@
 \name{holford}
+\docType{data}
 \alias{holford}
-\non_function{}
 \title{Holford's data on prostatic cancer deaths}
 \usage{data(minitab)}
 \description{

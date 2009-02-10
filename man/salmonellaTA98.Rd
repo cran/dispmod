@@ -1,6 +1,6 @@
 \name{salmonellaTA98}
+\docType{data}
 \alias{salmonellaTA98}
-\non_function{}
 \title{Salmonella reverse mutagenicity assay}
 \usage{data(salmonellaTA98)}
 \description{

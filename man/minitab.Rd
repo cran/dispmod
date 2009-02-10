@@ -1,6 +1,6 @@
 \name{minitab}
+\docType{data}
 \alias{minitab}
-\non_function{}
 \title{Minitab tree data}
 \usage{data(minitab)}
 \description{

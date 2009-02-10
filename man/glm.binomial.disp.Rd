@@ -28,7 +28,6 @@ Identical expressions for the mean and variance of \eqn{y_i} can be obtained if 
 
 The method proposed by Williams uses an iterative algorithm for estimating the dispersion parameter \eqn{\phi} and hence the necessary weights \eqn{1/(1+\phi(m_i-1))}{1/(1+\phi*(\mu_i - 1))} (for details see Williams, 1982).
 }
-}
 \value{
 The function returns an object of class `"glm"' with the usual information (see \code{help(glm)}) and the added components:   
 \item{dispersion}{the estimated dispersion parameter.}
