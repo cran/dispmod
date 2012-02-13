@@ -15,8 +15,8 @@ This data frame contains the following columns:
   \item{V}{marketable volume of wood, cubic feet}
 }
 }
-\details{}
+%\details{}
 \source{Ryan, T.A., Joiner, B.L. and Ryan, B.F. (1976) \emph{Minitab Student Handbook}. N. Scituate, MA: Duxbury.}
 \references{Cook, R.D. and Weisberg, S. (1982) \emph{Residuals and Influence in Regression}, New York:  Chapman and Hall, p. 66.}
-\examples{}
+%\examples{}
 \keyword{datasets}

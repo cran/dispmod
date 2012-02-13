@@ -17,8 +17,8 @@ This data frame contains the following columns:
   \item{Cohort}{cohorts.}
 }
 }
-\details{}
+%\details{}
 \source{Holford, T.R. (1983) The estimation of age, period and cohort effects for vital rates. \emph{Biometrics}, \bold{39}, 311--324.}
 \references{ Breslow, N.E. (1984), Extra-Poisson variation in log-linear models, \emph{Applied Statistics}, \bold{33}, 38--44.}
-\examples{}
+%\examples{}
 \keyword{datasets}

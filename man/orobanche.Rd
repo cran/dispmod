@@ -19,9 +19,9 @@ This data frame contains the following columns:
   \item{variety}{Variety name}
 }
 }
-\details{}
+%\details{}
 \source{Crowder, M.J. (1978) Beta-binomial anova for proportions. \emph{Applied Statistics}, \bold{27}, 34--37.}
 
 \references{Collett, D. (1991) \emph{Modelling Binary Data}, London: Chapman and Hall, Chapter 6.}
-\examples{}
+%\examples{}
 \keyword{datasets}

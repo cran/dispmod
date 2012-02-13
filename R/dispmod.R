@@ -2,8 +2,7 @@
 ## Normal dispersion model
 ##
 
-"lm.disp" <- 
-function(formula, var.formula=NULL, data = list(), maxit = 30, epsilon = glm.control()$epsilon, subset, na.action = na.omit, contrasts = NULL, offset = NULL)
+lm.disp <- function(formula, var.formula=NULL, data = list(), maxit = 30, epsilon = glm.control()$epsilon, subset, na.action = na.omit, contrasts = NULL, offset = NULL)
 {
   cl <- match.call()
   mf <- match.call(expand.dots = FALSE)
@@ -113,8 +112,7 @@ function(formula, var.formula=NULL, data = list(), maxit = 30, epsilon = glm.con
 
 }
 
-"summary.dispmod" <- 
-function(object, ...)
+summary.dispmod <- function(object, ...)
 {
   summary.mean <- summary(object$mean, dispersion=1, ...)
   summary.var  <- summary(object$var, dispersion=2, ...)
@@ -146,8 +144,7 @@ function(object, ...)
 ##  Overdispersed binomial logit models
 ##
 
-"glm.binomial.disp" <- 
-function(object, maxit = 30, verbose = TRUE)
+glm.binomial.disp <- function(object, maxit = 30, verbose = TRUE)
 {
   if (class(object)[1] != "glm")
      stop("first argument must be a fitted model of class \"glm\" !")
@@ -164,40 +161,49 @@ function(object, maxit = 30, verbose = TRUE)
   n <- dim(X)[[1]]
   h <- lm.influence(object)$hat
   X2 <- pearson.X2(object)
-  # initial estimate of dispersion parameter
-  phi <- (X2 - (n-p)) / sum((trials-1)*(1-h))
+  env <- parent.frame()
+  assign("object", object, envir = env)
   
-  if (verbose)
-      cat("\nBinomial overdispersed logit model fitting...\n")
+  # initial estimate of dispersion parameter
+  phi <- max((X2 - (n-p)) / sum((trials-1)*(1-h)), 0)
+
+  if(verbose)
+    cat("\nBinomial overdispersed logit model fitting...\n")
+  
   # loop until Pearson X2 approx equal to 1
   i <- 0
+  converged <- TRUE
   while( abs(X2/(n-p)-1) > object$control$epsilon )
   {
     i <- i + 1
-    if (i > maxit) 
-       { warning("algoritm not converged after ", i, " iterations!")
-        return() }
-    else 
-       if (verbose) cat("Iter. ", i, " phi:", format(phi), "\n")
+    if(i > maxit) 
+      { converged <- FALSE
+        break() }
+    else if(verbose) 
+      { cat("Iter. ", i, " phi:", format(phi), "\n") }
 
     # computes weights
     w <- 1/(1+phi*(trials-1))  
     # re-fit the model using update() evaluated in original model 
-    # environment, usually R_GlobalEnv
-    disp.weights <<- w; object <<- object
+    assign("disp.weights", w, envir = env)
     object <- eval(expression(update(object, weights=disp.weights)), 
-                   envir = object$data)
+                   envir = env)
     #
     h <- lm.influence(object)$hat
     X2 <- pearson.X2(object)
     # current estimate of dispersion parameter
-    phi <- (X2 - sum(w*(1-h))) / sum(w*(trials-1)*(1-h))
+    phi <- max((X2 - sum(w*(1-h))) / sum(w*(trials-1)*(1-h)), 0)
   }
 
-  if (verbose) 
-     { cat("Converged after", i, "iterations. \n")
-       cat("Estimated dispersion parameter:", format(phi), "\n") 
-           print(summary(object)) }
+  if(verbose)
+    { if(converged)
+        { cat("Converged after", i, "iterations. \n")
+          cat("Estimated dispersion parameter:", format(phi), "\n") 
+          print(summary(object)) 
+        }
+      else
+        warning("algoritm not converged after ", i, " iterations!")
+    }
 
   object <- c(object, list(dispersion=phi, disp.weights=w))
   class(object) <- class
@@ -208,14 +214,13 @@ function(object, maxit = 30, verbose = TRUE)
 ##  Overdispersed Poisson loglinear models
 ##
 
-"glm.poisson.disp" <- 
-function(object, maxit = 30, verbose = TRUE)
+glm.poisson.disp <- function(object, maxit = 30, verbose = TRUE)
 {
-  if (class(object)[1] != "glm")
-         stop("first argument must be a fitted model of class \"glm\" !")
+  if(class(object)[1] != "glm")
+     stop("first argument must be a fitted model of class \"glm\" !")
   class <- class(object)
-  if (!(family(object)$family == "poisson" & family(object)$link == "log"))
-         stop("overdispersed model fitting available only for \npoisson regression models with log link function!")
+  if(!(family(object)$family == "poisson" & family(object)$link == "log"))
+     stop("overdispersed model fitting available only for \npoisson regression models with log link function!")
 
   pearson.X2 <- function(x) sum(residuals(x, "pearson")^2)
 
@@ -228,40 +233,49 @@ function(object, maxit = 30, verbose = TRUE)
   p <- length(object$coefficients)
   n <- length(y)
   X2 <- pearson.X2(object)
-  # initial estimate of dispersion parameter
-  phi <- (X2 - (n-p)) / sum(mu*(1-mu*h))
+  env <- parent.frame()
+  assign("object", object, envir = env)
 
-  if (verbose)
-     cat("\nPoisson overdispersed log-linear model fitting...\n")
+  # initial estimate of dispersion parameter
+  phi <- max((X2 - (n-p)) / sum(mu*(1-mu*h)), 0)
+
+  if(verbose)
+    cat("\nPoisson overdispersed log-linear model fitting...\n")
+    
   # loop until Pearson X2 approx equal to 1
   i <- 0
+  converged <- TRUE
   while( abs(X2/(n-p)-1) > object$control$epsilon )
   {
     i <- i + 1
-    if (i > maxit) 
-       { warning("algoritm not converged after ", i, " iterations!")
-         return() }
-    else 
-       if (verbose) cat("Iter. ", i, " sigma^2:", format(phi), "\n")
+    if(i > maxit) 
+      { converged <- FALSE
+        break() }
+    else if(verbose) 
+      { cat("Iter. ", i, " phi:", format(phi), "\n") }
 
     # computes weights
     w <- 1/(1+(phi*mu))          
     # re-fit the model using update() evaluated in original model 
-    # environment, usually R_GlobalEnv
-    disp.weights <<- w; object <<- object
+    assign("disp.weights", w, envir = env)
     object <- eval(expression(update(object, weights=disp.weights)), 
-                   envir = object$data)
+                   envir = env)
 
     mu <- object$fitted.values
     X2 <- pearson.X2(object)
     # current estimate of dispersion parameter
-    phi <- sum( (y-mu)^2 / (mu*(mu+1/phi)) ) / (n-p)
+    phi <- max(sum( (y-mu)^2 / (mu*(mu+1/phi)) ) / (n-p), 0)
   }
 
-  if (verbose) 
-     { cat("Converged after", i, "iterations. \n")
-       cat("Estimated dispersion parameter:", format(phi), "\n") 
-       print(summary(object)) }
+  if(verbose)
+    { if(converged)
+        { cat("Converged after", i, "iterations. \n")
+          cat("Estimated dispersion parameter:", format(phi), "\n") 
+          print(summary(object)) 
+        }
+      else
+        warning("algoritm not converged after ", i, " iterations!")
+    }
 
   object <- c(object, list(dispersion=phi, disp.weights=w))
   class(object) <- class

@@ -1,0 +1,13 @@
+Changes to version 1.0.1
+
+   o Avoid estimation of dispersion parameter < 0 in glm.binomial.disp and 
+     glm.poisson.disp.
+   o The model glm.binomial.disp and glm.poisson.disp is updated in a new 
+     environment created from parent.frame() and globalenv() is not modified.
+ 
+Changes to version 1.0
+   o Bug fixes.
+
+
+   
+   
