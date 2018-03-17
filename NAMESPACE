@@ -1,1 +1,9 @@
-exportPattern("^[^\\.]")
+import("stats")
+
+export("lm.disp", "summary.dispmod", "print.summary.dispmod")
+S3method("summary", "dispmod")
+S3method("print", "summary.dispmod")
+
+export("glm.binomial.disp")
+
+export("glm.poisson.disp")

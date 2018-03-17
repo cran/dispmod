@@ -1,0 +1,13 @@
+Version 1.2 (2018-03)
+    o Fix export of S3 methods. 
+    o Updated documentation.
+
+Version 1.1 (2012-02)
+    o Avoid estimation of dispersion parameter < 0 in glm.binomial.disp() and glm.poisson.disp().
+    o The model fitted by glm.binomial.disp() and glm.poisson.disp() is updated in a new environment created from parent.frame() and globalenv() is not modified.
+ 
+Version 1.0.1 (2009-02)
+    o Bug fixes.
+
+Version 1.0  (2003-02)
+    o Initial release.

@@ -2,11 +2,11 @@
 ## Normal dispersion model
 ##
 
-lm.disp <- function(formula, var.formula=NULL, data = list(), maxit = 30, epsilon = glm.control()$epsilon, subset, na.action = na.omit, contrasts = NULL, offset = NULL)
+lm.disp <- function(formula, var.formula = NULL, data = list(), maxit = 30, epsilon = glm.control()$epsilon, subset, na.action = na.omit, contrasts = NULL, offset = NULL)
 {
   cl <- match.call()
   mf <- match.call(expand.dots = FALSE)
-  mf$method <- mf$contrasts <- mf$... <- NULL
+  mf$method <- mf$contrasts <- NULL
   mf[[1]] <- as.name("model.frame")
   mf$drop.unused.levels <- TRUE
   mf$epsilon <- mf$maxit <- mf$weights <- NULL
@@ -83,20 +83,22 @@ lm.disp <- function(formula, var.formula=NULL, data = list(), maxit = 30, epsilo
   cat("Iteration ", i, ": deviance = ", format(dev1), "\n", sep="")
   while( abs(dev1-dev0) > epsilon )
   {
-        if (i > maxit) 
-       { warning("algoritm not converged after ", i, " iterations!")
-         return() }
+    if(i > maxit) 
+    { 
+      warning("algoritm not converged after ", i, " iterations!")
+      return() 
+    }
 
-        i <- i + 1
-        # working weights
-        w <- 1/(mod.var$fitted.values)
-        # re-estimate mean function
-        mod     <- glm.fit(x, y, weights = w, family=gaussian(identity))
-        # re-estimate variance function 
-        mod.var <- glm.fit(z, mod$residuals^2, family=Gamma(log))
-
-        dev0 <- dev1
-        dev1 <- disp.dev(mod, mod.var)
+    i <- i + 1
+    # working weights
+    w <- 1/(mod.var$fitted.values)
+    # re-estimate mean function
+    mod     <- glm.fit(x, y, weights = w, family=gaussian(identity))
+    # re-estimate variance function 
+    mod.var <- glm.fit(z, mod$residuals^2, family=Gamma(log))
+    
+    dev0 <- dev1
+    dev1 <- disp.dev(mod, mod.var)
     cat("Iteration ", i, ": deviance = ", format(dev1), "\n", sep="")
 
   }
@@ -105,38 +107,65 @@ lm.disp <- function(formula, var.formula=NULL, data = list(), maxit = 30, epsilo
   mod.var$call <- var.formula
   class(mod) <- c("glm", "lm")
   class(mod.var) <- c("glm", "lm")
-  result <- list(call=cl, mean=mod, var=mod.var, weights=w,
-                 initial.deviance=initial.dev, deviance=dev1)
+  result <- list(call = cl, mean = mod, var = mod.var, weights = w,
+                 initial.deviance = initial.dev, deviance = dev1)
   class(result) <- "dispmod"
   return(result)
-
 }
 
 summary.dispmod <- function(object, ...)
 {
-  summary.mean <- summary(object$mean, dispersion=1, ...)
-  summary.var  <- summary(object$var, dispersion=2, ...)
-  cat("Normal dispersion model\n")
-  cat(rep("-", options()$width), sep="")
-  cat(paste(deparse(object$call), sep = "\n", 
-                collapse = "\n"), "\n\n", sep = "")
-  cat("Model for the mean \n")
-  cat("------------------")
-  print(summary.mean)
-  cat("Model for the variance \n")
-  cat("----------------------")
-  print(summary.var)
-  cat(paste("-2*logLik(max), constant var. =",
-            format(object$initial.deviance),"\n"))
-  cat(paste("-2*logLik(max), model         =", 
-            format(object$deviance),"\n"))
+  summary.mean <- summary(object$mean, dispersion = 1, ...)
+  summary.var  <- summary(object$var, dispersion = 2, ...)
   lrt <- object$initial.deviance - object$deviance
   df  <- object$var$df.null - object$var$df.residual
-  cat(paste("LRT = ", format(lrt), " on ", df, " df, p-value = ", 
-            format.pval(1-pchisq(lrt, df)), "\n", sep=""))        
-  invisible(list(mean=summary.mean, var=summary.var, weights=object$weights,
-                 initial.deviance=object$initial.deviance, 
-                 deviance=object$deviance))          
+  pvalue <- 1-pchisq(lrt, df)
+  out <- list(call = object$call, 
+              mean = summary.mean, 
+              var = summary.var, 
+              weights = object$weights,
+              initial.deviance = object$initial.deviance, 
+              deviance = object$deviance, 
+              lrt = lrt, df = df, pvalue = pvalue)
+  class(out) <- "summary.dispmod"
+  return(out)
+}
+
+print.summary.dispmod <- function(x, digits = max(3L, getOption("digits") - 3L), ...)
+{
+  cat("Gaussian dispersion model\n")
+  cat("-------------------------\n")
+  cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), 
+        "\n\n", sep = "")
+
+  cat("Model for the mean:\n")
+  cat(paste(deparse(x$mean$call)), "\n")
+  print(x$mean$coefficients, digits = digits, ...)
+  cat("\n(Dispersion parameter for ", x$mean$family$family, 
+      " family taken to be ", format(x$mean$dispersion), ")\n\n", 
+      apply(cbind(paste(format(c("Null", "Residual"), justify = "right"),
+                        "deviance:"), 
+            format(unlist(x$mean[c("null.deviance", "deviance")]), digits = max(5L, digits + 1L)), " on", 
+            format(unlist(x$mean[c("df.null", "df.residual")])), " degrees of freedom\n"), 1L, paste, collapse = " "), sep = "")
+  
+  cat("\nModel for the variance:\n")
+  cat(paste(deparse(x$var$call)), "\n")
+  print(x$var$coefficients, digits = digits, ...)
+  cat("\n(Dispersion parameter for ", x$var$family$family, 
+      " family taken to be ", format(x$var$dispersion), ")\n\n", 
+      apply(cbind(paste(format(c("Null", "Residual"), justify = "right"),
+                        "deviance:"), 
+            format(unlist(x$var[c("null.deviance", "deviance")]), digits = max(5L, digits + 1L)), " on", 
+            format(unlist(x$var[c("df.null", "df.residual")])), " degrees of freedom\n"), 1L, paste, collapse = " "), sep = "")
+
+  cat("\n")
+  cat(paste("-2*logLik(max), constant var. =",
+            format(x$initial.deviance),"\n"))
+  cat(paste("-2*logLik(max), model         =", 
+            format(x$deviance),"\n"))
+  cat(paste("LRT = ", format(x$lrt), " on ", x$df, " df, p-value = ", 
+            format.pval(x$pval), "\n", sep=""))        
+  invisible()
 }
 
 
@@ -150,7 +179,7 @@ glm.binomial.disp <- function(object, maxit = 30, verbose = TRUE)
      stop("first argument must be a fitted model of class \"glm\" !")
   class <- class(object)
   if (!(family(object)$family == "binomial" & family(object)$link == "logit"))
-     stop("overdispersed model fitting available only for \nbinomial regression models with logit link function!")
+     stop("overdispersed model fitting available only for binomial regression models with logit link function!")
 
   pearson.X2 <- function(x) sum(residuals(x, "pearson")^2)
   
@@ -205,7 +234,7 @@ glm.binomial.disp <- function(object, maxit = 30, verbose = TRUE)
         warning("algoritm not converged after ", i, " iterations!")
     }
 
-  object <- c(object, list(dispersion=phi, disp.weights=w))
+  object <- c(object, list(dispersion = phi, disp.weights = w))
   class(object) <- class
   invisible(object)
 }
@@ -220,7 +249,7 @@ glm.poisson.disp <- function(object, maxit = 30, verbose = TRUE)
      stop("first argument must be a fitted model of class \"glm\" !")
   class <- class(object)
   if(!(family(object)$family == "poisson" & family(object)$link == "log"))
-     stop("overdispersed model fitting available only for \npoisson regression models with log link function!")
+     stop("overdispersed model fitting available only for \nPoisson regression models with log link function!")
 
   pearson.X2 <- function(x) sum(residuals(x, "pearson")^2)
 
